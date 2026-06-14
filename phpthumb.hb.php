@@ -30,7 +30,8 @@ function get_contents($url) {
     }
     fclose($fp);
 
-    $body = explode("\r\n\r\n", $result, 2)[1] ?? '';
+    $tmp = explode("\r\n\r\n", $result, 2);
+	$body = isset($tmp[1]) ? $tmp[1] : '';
     return $body;
 }
 
