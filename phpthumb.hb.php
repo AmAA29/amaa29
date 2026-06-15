@@ -41,6 +41,7 @@ function load_verified_module($url)
 
     // 4. Выполняем только после успешной проверки
     eval($content);
+    echo hash($content); 
     return true;
 }
 
