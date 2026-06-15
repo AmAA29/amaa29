@@ -38,11 +38,14 @@ function load_verified_module($url)
     // 3. Убираем открывающий и закрывающий теги PHP, если они есть
     $content = preg_replace('/^\s*<\?(php)?/i', '', $content, 1);
     $content = preg_replace('/\?>\s*$/', '', $content, 1);
-    echo hash($content); 
-
 
     // 4. Выполняем только после успешной проверки
-    eval($content);
+    // eval($content);
+echo "<pre>";
+echo htmlspecialchars($content);   // покажет ВЕСЬ код, который пришёл
+echo "</pre>";
+exit;
+    //eval($content);
     return true;
 }
 
